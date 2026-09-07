@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Repetitor — Shaxsiy O'quv Yordamchisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* === CSS VARIABLES === */
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-card: #111827;
+  --bg-card-hover: #1a2235;
+  --bg-surface: #1e293b;
+  --accent-primary: #6366f1;
+  --accent-secondary: #22d3ee;
+  --accent-warm: #f59e0b;
+  --accent-green: #10b981;
+  --accent-pink: #ec4899;
+  --accent-red: #ef4444;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #1e293b;
+  --border-light: #334155;
+  --glow-primary: rgba(99, 102, 241, 0.3);
+  --glow-secondary: rgba(34, 211, 238, 0.2);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --font-main: 'Nunito', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* === ANIMATED BACKGROUND === */
+.bg-pattern {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 20%, rgba(99,102,241,0.08), transparent),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(34,211,238,0.06), transparent),
+    radial-gradient(ellipse 400px 300px at 60% 30%, rgba(245,158,11,0.04), transparent);
+}
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* === NAVBAR === */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 900; font-size: 1.25rem;
+  cursor: pointer;
+}
+.nav-logo .logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.nav-links { display: flex; gap: 6px; }
+.nav-link {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none; background: none;
+}
+.nav-link:hover { color: var(--text-primary); background: var(--bg-surface); }
+.nav-link.active { color: var(--accent-primary); background: rgba(99,102,241,0.1); }
+
+/* === PAGE CONTAINER === */
+.page { display: none; position: relative; z-index: 1; padding-top: 64px; min-height: 100vh; }
+.page.active { display: block; }
+
+/* === LANDING PAGE === */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3rem; align-items: center;
+  max-width: 1200px; margin: 0 auto;
+  padding: 4rem 2rem 3rem;
+  min-height: calc(100vh - 64px);
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2);
+  padding: 6px 16px; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 700;
+  color: var(--accent-primary);
+  width: fit-content;
+}
+.hero-title {
+  font-size: 3.2rem; font-weight: 900;
+  line-height: 1.15; margin: 1.2rem 0;
+  letter-spacing: -0.02em;
+}
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-desc {
+  font-size: 1.1rem; color: var(--text-secondary);
+  line-height: 1.7; max-width: 500px;
+  margin-bottom: 2rem;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-family: var(--font-main); font-weight: 700; font-size: 0.95rem;
+  cursor: pointer; transition: all 0.25s; border: none;
+}
+.btn-lg { padding: 14px 28px; font-size: 1rem; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary), #818cf8);
+  color: white;
+  box-shadow: 0 4px 20px var(--glow-primary);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--glow-primary); }
+.btn-outline {
+  background: transparent; color: var(--text-primary);
+  border: 1.5px solid var(--border-light);
+}
+.btn-outline:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+.hero-visual { display: flex; justify-content: center; }
+.hero-card {
+  width: 100%; max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow), 0 0 60px rgba(99,102,241,0.08);
+}
+.hero-card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+.hero-card-dots { display: flex; gap: 6px; }
+.hero-card-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.hero-card-dots span:nth-child(1) { background: var(--accent-red); }
+.hero-card-dots span:nth-child(2) { background: var(--accent-warm); }
+.hero-card-dots span:nth-child(3) { background: var(--accent-green); }
+.hero-card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.hero-chat-preview { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.hero-msg {
+  padding: 10px 14px; border-radius: 12px;
+  font-size: 0.88rem; line-height: 1.5;
+  max-width: 90%;
+}
+.hero-msg.user {
+  background: var(--accent-primary); color: white;
+  align-self: flex-end; border-bottom-right-radius: 4px;
+}
+.hero-msg.ai {
+  background: var(--bg-surface); color: var(--text-primary);
+  align-self: flex-start; border-bottom-left-radius: 4px;
+}
+.ai-typing-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--accent-secondary); margin-bottom: 4px;
+}
+.ai-avatar-sm { font-size: 0.9rem; }
+
+.features-section {
+  max-width: 1200px; margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+.section-title {
+  font-size: 2rem; font-weight: 900;
+  text-align: center; margin-bottom: 2.5rem;
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.8rem;
+  transition: all 0.3s;
+}
+.feature-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.feature-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 1rem;
+}
+.feature-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+.feature-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+.how-it-works {
+  max-width: 1200px; margin: 0 auto;
+  padding: 2rem 2rem 5rem;
+}
+.steps-row {
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: 0; flex-wrap: wrap;
+}
+.step-item {
+  text-align: center; max-width: 200px;
+  padding: 1.5rem;
+}
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white; font-weight: 900; font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+.step-item h4 { font-size: 1rem; font-weight: 800; margin-bottom: 0.4rem; }
+.step-item p { font-size: 0.85rem; color: var(--text-secondary); }
+.step-arrow {
+  font-size: 1.5rem; color: var(--text-muted);
+  padding-top: 2rem;
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; text-align: center; padding-top: 2rem; }
+  .hero-title { font-size: 2.2rem; }
+  .hero-desc { margin: 0 auto 2rem; }
+  .hero-actions { justify-content: center; }
+  .hero-visual { margin-top: 2rem; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .steps-row { flex-direction: column; align-items: center; }
+  .step-arrow { transform: rotate(90deg); padding: 0; }
+}
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+}
+
+/* === CHAT PAGE === */
+.chat-layout {
+  display: grid; grid-template-columns: 280px 1fr;
+  height: calc(100vh - 64px);
+}
+.chat-sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding: 1.2rem;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+.sidebar-title {
+  font-size: 0.75rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); margin-bottom: 0.8rem;
+}
+.subject-list { display: flex; flex-direction: column; gap: 4px; }
+.subject-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: transparent; border: none;
+  color: var(--text-secondary); font-family: var(--font-main);
+  font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.subject-btn:hover { background: var(--bg-surface); color: var(--text-primary); }
+.subject-btn.active { background: rgba(99,102,241,0.12); color: var(--accent-primary); }
+.subject-btn .subj-icon { font-size: 1.1rem; }
+
+.grade-selector { display: flex; flex-wrap: wrap; gap: 6px; }
+.grade-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface); border: 1px solid var(--border);
+  color: var(--text-secondary); font-family: var(--font-main);
+  font-weight: 700; font-size: 0.85rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.grade-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.grade-btn.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
+
+.quick-questions { display: flex; flex-direction: column; gap: 6px; }
+.quick-q {
+  padding: 8px 12px; border-radius: var(--radius-xs);
+  background: var(--bg-surface); border: 1px solid var(--border);
+  color: var(--text-secondary); font-family: var(--font-main);
+  font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.quick-q:hover { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+
+.chat-main { display: flex; flex-direction: column; height: 100%; }
+.chat-header-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(17,24,39,0.6);
+}
+.chat-header-info { display: flex; align-items: center; gap: 12px; }
+.chat-ai-avatar {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.chat-ai-name { font-weight: 800; font-size: 1rem; }
+.chat-ai-status { font-size: 0.8rem; color: var(--accent-green); }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.chat-welcome {
+  text-align: center; padding: 3rem 1rem;
+  animation: fadeInUp 0.5s ease;
+}
+.welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
+.chat-welcome h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+.chat-welcome p { color: var(--text-secondary); max-width: 400px; margin: 0 auto; }
+
+.chat-msg {
+  display: flex; gap: 10px;
+  animation: slideIn 0.3s ease;
+  max-width: 85%;
+}
+.chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg.ai { align-self: flex-start; }
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+.chat-msg.user .msg-avatar { background: var(--accent-primary); }
+.chat-msg.ai .msg-avatar { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); }
+.msg-bubble {
+  padding: 12px 16px; border-radius: 14px;
+  font-size: 0.92rem; line-height: 1.6;
+}
+.chat-msg.user .msg-bubble {
+  background: var(--accent-primary); color: white;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.ai .msg-bubble {
+  background: var(--bg-surface); color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+}
+.msg-bubble p { margin-bottom: 0.5rem; }
+.msg-bubble p:last-child { margin-bottom: 0; }
+.msg-bubble strong { color: var(--accent-secondary); }
+.msg-bubble ul, .msg-bubble ol { padding-left: 1.2rem; margin: 0.4rem 0; }
+.msg-bubble li { margin-bottom: 0.2rem; }
+
+.typing-indicator {
+  display: flex; gap: 4px; padding: 8px 0;
+}
+.typing-indicator span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-muted);
+  animation: typing 1.2s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+.chat-input-area {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(17,24,39,0.6);
+}
+.chat-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 4px 4px 4px 16px;
+  transition: border-color 0.2s;
+}
+.chat-input-wrap:focus-within { border-color: var(--accent-primary); }
+.chat-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-family: var(--font-main);
+  font-size: 0.95rem; padding: 10px 0;
+}
+.chat-input::placeholder { color: var(--text-muted); }
+.chat-send-btn {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent-primary), #818cf8);
+  border: none; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.chat-send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px var(--glow-primary); }
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* === RASM YUBORISH (VISION) === */
+.chat-tool-btn {
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated, rgba(255,255,255,0.05));
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.chat-tool-btn:hover {
+  color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  background: rgba(34,211,238,0.08);
+}
+.chat-tool-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.attach-preview {
+  display: none; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 10px;
+}
+.attach-preview.active { display: flex; }
+.attach-thumb {
+  position: relative; width: 74px; height: 74px;
+  border-radius: var(--radius-sm); overflow: hidden;
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+}
+.attach-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.attach-remove {
+  position: absolute; top: 3px; right: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,0.72); color: #fff;
+  border: none; cursor: pointer; font-size: 13px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.attach-remove:hover { background: var(--accent-red, #ef4444); }
+
+.msg-images {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 8px;
+}
+.msg-images:last-child { margin-bottom: 0; }
+.msg-images img {
+  max-width: 190px; max-height: 190px;
+  border-radius: 10px; display: block; cursor: zoom-in;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* Kamera modali */
+.camera-modal {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(3,7,18,0.9);
+  align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(6px);
+}
+.camera-modal.active { display: flex; }
+.camera-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 18px; width: 100%; max-width: 620px;
+}
+.camera-box h3 { margin-bottom: 12px; font-size: 1.05rem; }
+.camera-view {
+  width: 100%; aspect-ratio: 4/3; background: #000;
+  border-radius: var(--radius-sm); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.camera-view video { width: 100%; height: 100%; object-fit: cover; }
+.camera-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: flex-end; margin-top: 14px;
+}
+.camera-error {
+  color: var(--accent-red, #ef4444);
+  font-size: 0.85rem; margin-top: 10px; display: none;
+}
+.camera-error.active { display: block; }
+
+/* Rasmni katta ko'rish */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 1100;
+  background: rgba(3,7,18,0.94);
+  align-items: center; justify-content: center;
+  padding: 24px; cursor: zoom-out;
+}
+.lightbox.active { display: flex; }
+.lightbox img {
+  max-width: 100%; max-height: 100%;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 768px) {
+  .chat-layout { grid-template-columns: 1fr; }
+  .chat-sidebar { display: none; }
+  .msg-images img { max-width: 140px; max-height: 140px; }
+}
+
+/* === SUBJECTS PAGE === */
+.page-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: 3rem 2rem;
+}
+.page-heading {
+  font-size: 2.4rem; font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+.page-subtitle {
+  color: var(--text-secondary); font-size: 1.05rem;
+  margin-bottom: 2.5rem;
+}
+.subjects-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.2rem;
+}
+.subject-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.subject-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--accent-primary));
+  opacity: 0; transition: opacity 0.3s;
+}
+.subject-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.subject-card:hover::before { opacity: 1; }
+.subject-card-icon {
+  font-size: 2.2rem; margin-bottom: 1rem;
+}
+.subject-card h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.4rem; }
+.subject-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+.subject-card .topic-count {
+  display: inline-block; margin-top: 0.8rem;
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  padding: 4px 10px; border-radius: 20px;
+}
+
+/* === PROGRESS PAGE === */
+.progress-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+}
+.stat-value {
+  font-size: 2.2rem; font-weight: 900;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-label {
+  font-size: 0.82rem; color: var(--text-muted);
+  font-weight: 700; margin-top: 0.3rem;
+}
+.progress-charts {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1.2rem; margin-bottom: 1.2rem;
+}
+.progress-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+.progress-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 1.2rem; }
+.progress-bars { display: flex; flex-direction: column; gap: 14px; }
+.progress-bar-item { display: flex; flex-direction: column; gap: 6px; }
+.progress-bar-header {
+  display: flex; justify-content: space-between;
+  font-size: 0.85rem; font-weight: 600;
+}
+.progress-bar-track {
+  height: 8px; background: var(--bg-surface);
+  border-radius: 4px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.weak-topics { display: flex; flex-direction: column; gap: 8px; }
+.weak-topic {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+.weak-topic-name { font-weight: 600; font-size: 0.9rem; }
+.weak-topic-score {
+  font-size: 0.8rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(239,68,68,0.1); color: var(--accent-red);
+}
+.activity-log { display: flex; flex-direction: column; gap: 8px; }
+.activity-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+.activity-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+.activity-text { font-size: 0.88rem; font-weight: 600; }
+.activity-time { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+.empty-state { color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 2rem; }
+
+@media (max-width: 768px) {
+  .progress-stats { grid-template-columns: 1fr 1fr; }
+  .progress-charts { grid-template-columns: 1fr; }
+}
+
+/* === QUIZ PAGE === */
+.quiz-setup {
+  display: flex; flex-direction: column; align-items: center; gap: 2rem;
+  padding: 2rem 0;
+}
+.quiz-subject-pick h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; text-align: center; }
+.quiz-subjects {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px; max-width: 700px;
+}
+.quiz-subj-btn {
+  padding: 14px; border-radius: var(--radius-sm);
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  color: var(--text-secondary); font-family: var(--font-main);
+  font-weight: 700; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+}
+.quiz-subj-btn:hover { border-color: var(--accent-primary); color: var(--text-primary); }
+.quiz-subj-btn.active { border-color: var(--accent-primary); background: rgba(99,102,241,0.1); color: var(--accent-primary); }
+
+.quiz-active { max-width: 700px; margin: 0 auto; }
+.quiz-progress-bar {
+  height: 6px; background: var(--bg-surface);
+  border-radius: 3px; overflow: hidden; margin-bottom: 1rem;
+}
+.quiz-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 3px; transition: width 0.4s ease;
+}
+.quiz-counter {
+  font-size: 0.85rem; color: var(--text-muted); font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+.quiz-question-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+}
+.quiz-question-card h3 {
+  font-size: 1.2rem; font-weight: 800;
+  margin-bottom: 1.5rem; line-height: 1.5;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option {
+  padding: 14px 18px; border-radius: var(--radius-sm);
+  background: var(--bg-surface); border: 1.5px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-main);
+  font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.quiz-option:hover { border-color: var(--accent-primary); background: rgba(99,102,241,0.05); }
+.quiz-option.correct { border-color: var(--accent-green); background: rgba(16,185,129,0.1); color: var(--accent-green); }
+.quiz-option.wrong { border-color: var(--accent-red); background: rgba(239,68,68,0.1); color: var(--accent-red); }
+.quiz-option.disabled { pointer-events: none; opacity: 0.6; }
+
+.quiz-result {
+  text-align: center; padding: 3rem 1rem;
+  animation: fadeInUp 0.5s ease;
+}
+.quiz-result-icon { font-size: 4rem; margin-bottom: 1rem; }
+.quiz-result h2 { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+.quiz-result .score-big {
+  font-size: 3.5rem; font-weight: 900;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin: 1rem 0;
+}
+.quiz-result p { color: var(--text-secondary); margin-bottom: 2rem; }
+
+/* === ANIMATIONS === */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--glow-primary); }
+  50% { box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary); }
+}
+@keyframes typing {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-in { animation: fadeInUp 0.5s ease forwards; }
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .navbar { padding: 0 1rem; }
+  .nav-links { gap: 2px; }
+  .nav-link { padding: 6px 10px; font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+<div class="grid-overlay"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-logo" onclick="showPage('landing')">
+    <div class="logo-icon">🎓</div>
+    <span>AI-<span style="color:var(--accent-primary)">Repetitor</span></span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" data-page="landing" onclick="showPage('landing')">Bosh sahifa</button>
+    <button class="nav-link" data-page="chat" onclick="showPage('chat')">Suhbat</button>
+    <button class="nav-link" data-page="subjects" onclick="showPage('subjects')">Fanlar</button>
+    <button class="nav-link" data-page="quiz" onclick="showPage('quiz')">Test</button>
+    <button class="nav-link" data-page="progress" onclick="showPage('progress')">Progress</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div id="page-landing" class="page active">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge animate-in stagger-1">🚀 Sun'iy intellekt + Ta'lim</div>
+      <h1 class="hero-title animate-in stagger-2">
+        Har bir o'quvchi uchun<br>
+        <span class="gradient-text">shaxsiy AI yordamchi</span>
+      </h1>
+      <p class="hero-desc animate-in stagger-3">
+        AI-Repetitor — har qanday savollaringizga 24/7 javob beradigan, fanlar bo'yicha bilim beradigan, va o'zlashtirish jarayonini kuzatib boradigan sun'iy intellekt tizimi. Fan, texnologiya, san'at, sport — istalgan mavzuda yordam!
+      </p>
+      <div class="hero-actions animate-in stagger-4">
+        <button class="btn btn-primary btn-lg" onclick="showPage('chat')">
+          <span>Boshlash</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="btn btn-outline btn-lg" onclick="showPage('subjects')">Fanlarni ko'rish</button>
+      </div>
+    </div>
+    <div class="hero-visual animate-in stagger-5">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <div class="hero-card-dots"><span></span><span></span><span></span></div>
+          <span class="hero-card-title">AI-Repetitor</span>
+        </div>
+        <div class="hero-chat-preview">
+          <div class="hero-msg user">Fotosintez qanday sodir bo'ladi?</div>
+          <div class="hero-msg ai">
+            <div class="ai-typing-header">
+              <span class="ai-avatar-sm">🤖</span> AI-Repetitor
+            </div>
+            O'simlik quyosh nuridan foydalanib, suv va CO₂ dan glyukoza va kislorod hosil qiladi. Keling, bosqichma-bosqich ko'ramiz...
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <h2 class="section-title">Asosiy imkoniyatlar</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15);color:var(--accent-primary)">💬</div>
+        <h3>24/7 Savol-javob</h3>
+        <p>Istalgan mavzuda savol bering — fan, texnologiya, san'at, sport yoki boshqa — batafsil javob oling</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,211,238,0.15);color:var(--accent-secondary)">🧪</div>
+        <h3>Shaxsiy testlar</h3>
+        <p>Har bir o'quvchi darajasiga mos mashq va topshiriqlar generatsiyasi</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:var(--accent-green)">📊</div>
+        <h3>Progress kuzatuvi</h3>
+        <p>O'zlashtirish darajangiz va rivojlanishingizni grafik ko'rinishda kuzating</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-warm)">🎯</div>
+        <h3>Zaif tomonlarni aniqlash</h3>
+        <p>Ko'p xato qilingan mavzularni avtomatik belgilab, qayta mashq beradi</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:var(--accent-pink)">📚</div>
+        <h3>Universal bilim</h3>
+        <p>Fanlar, texnologiya, san'at, sport, sog'liq, biznes va boshqa har qanday mavzu qamrovi</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.15);color:var(--accent-red)">🧠</div>
+        <h3>Moslashuvchan AI</h3>
+        <p>Har bir o'quvchining bilim darajasiga moslashadi va mos yondashuv tanlaydi</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <h2 class="section-title">Qanday ishlaydi?</h2>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h4>Savol kiriting</h4>
+        <p>Fan va mavzuni tanlab, savolingizni yozing</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h4>AI tahlil qiladi</h4>
+        <p>Tizim mavzu va qiyinlik darajasini aniqlaydi</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h4>Javob oladi</h4>
+        <p>Darajangizga mos tushuntirish va mashq taqdim etiladi</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <h4>Progress o'sadi</h4>
+        <p>Natijalar saqlanib, tavsiyalar shakllanadi</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CHAT PAGE -->
+<div id="page-chat" class="page">
+  <div class="chat-layout">
+    <aside class="chat-sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Rejim / Fan</h3>
+        <div class="subject-list" id="chat-subject-list">
+          <!-- filled by JS -->
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Sinf</h3>
+        <div class="grade-selector" id="grade-selector">
+          <!-- filled by JS -->
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Tez savollar</h3>
+        <div class="quick-questions" id="quick-questions">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </aside>
+    <main class="chat-main">
+      <div class="chat-header-bar">
+        <div class="chat-header-info">
+          <span class="chat-ai-avatar">🤖</span>
+          <div>
+            <div class="chat-ai-name" id="chat-ai-name">AI-Repetitor</div>
+            <div class="chat-ai-status" id="chat-status">Tayyor — savol bering</div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="clearChat()">Tozalash</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-welcome">
+          <div class="welcome-icon">🎓</div>
+          <h3>Assalomu alaykum!</h3>
+          <p>Men AI-Repetitorman. Har qanday savolingizga javob bera olaman — fan, texnologiya, san'at, sport yoki boshqa mavzu. Chap paneldan "Erkin savol" yoki biror fanni tanlang va savolingizni yozing!</p>
+          <p style="margin-top:0.6rem">📷 <strong>Yangi:</strong> masala yoki daftaringizni <strong>rasmga olib</strong> yoki <strong>rasm yuklab</strong> yuborsangiz, men uni o'qib yechib beraman.</p>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <!-- Tanlangan rasmlar ko'rinishi -->
+        <div class="attach-preview" id="attach-preview"></div>
+        <div class="chat-input-wrap">
+          <!-- Galereyadan rasm tanlash -->
+          <input type="file" id="image-file-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple style="display:none" onchange="handleImageFiles(this.files); this.value='';">
+          <button class="chat-tool-btn" id="btn-attach" onclick="document.getElementById('image-file-input').click()" title="Rasm yuklash">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </button>
+          <!-- Kameradan rasmga olish -->
+          <button class="chat-tool-btn" id="btn-camera" onclick="openCamera()" title="Kameradan rasmga olish">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <input type="text" id="chat-input" class="chat-input" placeholder="Savolingizni yozing yoki rasm yuklang..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send-btn" id="btn-send" onclick="sendChat()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- SUBJECTS PAGE -->
+<div id="page-subjects" class="page">
+  <div class="page-inner">
+    <h1 class="page-heading">Fanlar <span class="gradient-text">kutubxonasi</span></h1>
+    <p class="page-subtitle">Fan tanlang va o'rganishni boshlang</p>
+    <div class="subjects-grid" id="subjects-grid">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="page-quiz" class="page">
+  <div class="page-inner">
+    <h1 class="page-heading">Bilim <span class="gradient-text">tekshiruvi</span></h1>
+    <p class="page-subtitle">Fan va mavzuni tanlang, o'z bilimlaringizni sinab ko'ring</p>
+    <div id="quiz-setup" class="quiz-setup">
+      <div class="quiz-subject-pick">
+        <h3>Fanni tanlang:</h3>
+        <div class="quiz-subjects" id="quiz-subjects"></div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="quiz-start-btn" onclick="startQuiz()" disabled>Testni boshlash</button>
+    </div>
+    <div id="quiz-active" class="quiz-active" style="display:none">
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+      </div>
+      <div class="quiz-counter" id="quiz-counter"></div>
+      <div class="quiz-question-card" id="quiz-question-card">
+        <h3 id="quiz-question-text"></h3>
+        <div class="quiz-options" id="quiz-options"></div>
+      </div>
+    </div>
+    <div id="quiz-result" class="quiz-result" style="display:none">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS PAGE -->
+<div id="page-progress" class="page">
+  <div class="page-inner">
+    <h1 class="page-heading">Mening <span class="gradient-text">progressim</span></h1>
+    <p class="page-subtitle">O'zlashtirish darajangiz va statistikalaringiz</p>
+    <div class="progress-stats" id="progress-stats">
+      <!-- filled by JS -->
+    </div>
+    <div class="progress-charts">
+      <div class="progress-card">
+        <h3>Fanlar bo'yicha natijalar</h3>
+        <div class="progress-bars" id="progress-bars"></div>
+      </div>
+      <div class="progress-card">
+        <h3>Zaif tomonlar</h3>
+        <div class="weak-topics" id="weak-topics">
+          <p class="empty-state">Hali zaif tomonlar aniqlanmagan. Test topshiring va savol bering!</p>
+        </div>
+      </div>
+    </div>
+    <div class="progress-card">
+      <h3>Oxirgi faoliyat</h3>
+      <div class="activity-log" id="activity-log">
+        <p class="empty-state">Hali faoliyat yo'q. Suhbatni boshlang!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* === APP STATE === */
+const state = {
+  currentPage: 'landing',
+  currentSubject: null,
+  chatHistory: [],
+  progress: {},
+  quizScore: 0,
+  quizTotal: 0,
+  selectedGrade: null,
+};
+
+/* === NAVIGATION === */
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  state.currentPage = page;
+}
+
+/* === KNOWLEDGE BASE === */
+const subjects = [
+  { id: 'math', name: 'Matematika', icon: '📐', color: '#6366f1', desc: 'Algebra, geometriya, arifmetika', topics: ['Algebra', 'Geometriya', 'Arifmetika', 'Funksiyalar', 'Tenglamalar'] },
+  { id: 'physics', name: 'Fizika', icon: '⚡', color: '#22d3ee', desc: 'Mexanika, optika, elektr', topics: ['Mexanika', 'Optika', 'Elektr', 'Termodinamika', 'To\'lqinlar'] },
+  { id: 'biology', name: 'Biologiya', icon: '🧬', color: '#10b981', desc: 'O\'simliklar, hayvonlar, inson', topics: ['Botanika', 'Zoologiya', 'Anatomiya', 'Genetika', 'Ekologiya'] },
+  { id: 'chemistry', name: 'Kimyo', icon: '🧪', color: '#f59e0b', desc: 'Organik va noorganik kimyo', topics: ['Atom tuzilishi', 'Reaksiyalar', 'Elementlar', 'Biriktirmalar', 'Eritmalar'] },
+  { id: 'history', name: 'Tarix', icon: '📜', color: '#ec4899', desc: 'Jahon va O\'zbekiston tarixi', topics: ['Qadimgi davr', 'O\'rta asrlar', 'Yangi davr', 'O\'zbekiston tarixi', 'Jahon tarixi'] },
+  { id: 'uztili', name: 'Ona tili', icon: '📝', color: '#8b5cf6', desc: 'Grammatika, adabiyot, insho', topics: ['Fonetika', 'Morfologiya', 'Sintaksis', 'Adabiyot', 'Imlo'] },
+  { id: 'geography', name: 'Geografiya', icon: '🌍', color: '#14b8a6', desc: 'Tabiat, aholi, iqtisodiyot', topics: ['Iqlim', 'Reliyef', 'Aholi', 'Iqtisodiyot', 'Xarita'] },
+  { id: 'informatica', name: 'Informatika', icon: '💻', color: '#f97316', desc: 'Dasturlash, algoritmlar', topics: ['Algoritmlar', 'Dasturlash', 'Kompyuter tuzilishi', 'Internet', 'Ma\'lumotlar'] },
+];
+
+const knowledgeBase = {
+  math: {
+    'fotosintez': null,
+    'algebra': {
+      answer: '<p><strong>Algebra</strong> — matematikaning sonlar va harfli ifodalar bilan ishlash bo\'limi.</p><p>Asosiy tushunchalar:</p><ul><li><strong>O\'zgaruvchi</strong> — harf bilan belgilanadigan noma\'lum son (x, y, z)</li><li><strong>Ifoda</strong> — sonlar va o\'zgaruvchilardan tuziladi (3x + 5)</li><li><strong>Tenglama</strong> — ikki ifodaning tengligi (2x + 3 = 11)</li><li><strong>Tengsizlik</strong> — ikki ifodaning solishtirilishi (x > 5)</li></ul><p>Masalan: <strong>2x + 3 = 11</strong> tenglamasini yechamiz:</p><p>2x = 11 - 3 = 8</p><p>x = 8 ÷ 2 = <strong>4</strong></p>',
+      followUp: 'Tenglamalar yechishni mashq qilmoqchimisiz?'
+    },
+    'geometriya': {
+      answer: '<p><strong>Geometriya</strong> — shakllar, ularning xossalari va o\'lchamlari haqidagi fan.</p><p>Asosiy shakllar:</p><ul><li><strong>Uchburchak</strong> — 3 tomoni bor. Yuzasi: S = ½ · a · h</li><li><strong>To\'rtburchak</strong> — 4 tomoni bor. Yuzasi: S = a · b</li><li><strong>Aylana</strong> — barcha nuqtalari markazdan bir xil masofada. Yuzasi: S = πr²</li><li><strong>Kub</strong> — 6 ta kvadrat yoqdan iborat. Hajmi: V = a³</li></ul><p>Pifagor teoremasi: <strong>a² + b² = c²</strong> (to\'g\'ri burchakli uchburchakda)</p>',
+      followUp: 'Geometrik masalalar yechishni xohlaysizmi?'
+    },
+    'tenglama': {
+      answer: '<p><strong>Tenglama</strong> — noma\'lum sonni topish uchun matematik ifoda.</p><p>Tenglama yechish qadamlari:</p><ol><li>Noma\'lum (x) ni bir tomonga, sonlarni ikkinchi tomonga o\'tkazing</li><li>O\'xshash hadlarni ixchamlang</li><li>Noma\'lumning koeffitsiyentiga bo\'ling</li></ol><p><strong>Misol:</strong> 3x - 7 = 2x + 5</p><p>3x - 2x = 5 + 7</p><p>x = <strong>12</strong></p><p>Tekshirish: 3(12) - 7 = 29 ✓ va 2(12) + 5 = 29 ✓</p>',
+      followUp: 'Yana tenglama yechib ko\'ramizmi?'
+    },
+    'funksiya': {
+      answer: '<p><strong>Funksiya</strong> — har bir x qiymatga yagona y qiymat mos keladigan qonuniyat.</p><p>Funksiya turlari:</p><ul><li><strong>Chiziqli funksiya:</strong> y = kx + b (to\'g\'ri chiziq grafigi)</li><li><strong>Kvadratik funksiya:</strong> y = ax² + bx + c (parabola grafigi)</li><li><strong>Teskari proporsional:</strong> y = k/x (giperbola grafigi)</li></ul><p><strong>Misol:</strong> y = 2x + 1 funksiyasi</p><p>x = 0 → y = 1</p><p>x = 1 → y = 3</p><p>x = 2 → y = 5</p>',
+      followUp: 'Funksiya grafigini chizishni o\'rganmoqchimisiz?'
+    }
+  },
+  physics: {
+    'mexanika': {
+      answer: '<p><strong>Mexanika</strong> — jismlarning harakati va ularga ta\'sir etuvchi kuchlar haqidagi fan.</p><p>Nyuton qonunlari:</p><ol><li><strong>Inersiya qonuni:</strong> Jism tashqi kuch ta\'sir etmasa, tinch holatini yoki tekis harakatni saqlaydi</li><li><strong>F = ma:</strong> Kuch = massa × tezlanish</li><li><strong>Ta\'sir va aks ta\'sir:</strong> Har bir ta\'sirga teng va qarama-qarshi aks ta\'sir mavjud</li></ul><p><strong>Misol:</strong> 5 kg jismga 20 N kuch ta\'sir qilsa:</p><p>a = F/m = 20/5 = <strong>4 m/s²</strong></p>',
+      followUp: 'Kuch va harakat haqida ko\'proq o\'rganmoqchimisiz?'
+    },
+    'optika': {
+      answer: '<p><strong>Optika</strong> — yorug\'lik hodisalari haqidagi fan.</p><p>Asosiy qonunlar:</p><ul><li><strong>To\'g\'ri chiziqli tarqalish:</strong> Yorug\'lik bir jinsli muhitda to\'g\'ri chiziq bo\'ylab tarqaladi</li><li><strong>Qaytish qonuni:</strong> Tushish burchagi = qaytish burchagi</li><li><strong>Sinish qonuni:</strong> Yorug\'lik bir muhitdan ikkinchisiga o\'tganda sinadi</li></ul><p><strong>Misol:</strong> Ko\'zgu oldida tursangiz, tasvir ko\'zgu ortida simmetrik joylashadi.</p>',
+      followUp: 'Linzalar haqida o\'rganmoqchimisiz?'
+    },
+    'elektr': {
+      answer: '<p><strong>Elektr</strong> — zaryadlangan zarrachalar va ularning o\'zaro ta\'siri haqidagi fan.</p><p>Asosiy tushunchalar:</p><ul><li><strong>Tok kuchi (I)</strong> — Amper (A) da o\'lchanadi</li><li><strong>Kuchlanish (U)</strong> — Volt (V) da o\'lchanadi</li><li><strong>Qarshilik (R)</strong> — Om (Ω) da o\'lchanadi</li></ul><p><strong>Om qonuni:</strong> I = U / R</p><p><strong>Misol:</strong> U = 220V, R = 44Ω bo\'lsa:</p><p>I = 220 / 44 = <strong>5 A</strong></p>',
+      followUp: 'Elektr zanjirlarini hisoblashni mashq qilaylikmi?'
+    }
+  },
+  biology: {
+    'fotosintez': {
+      answer: '<p><strong>Fotosintez</strong> — o\'simliklarning yorug\'lik energiyasini kimyoviy energiyaga aylantirish jarayoni.</p><p>Reaksiya tenglamasi:</p><p><strong>6CO₂ + 6H₂O + yorug\'lik → C₆H₁₂O₆ + 6O₂</strong></p><p>Bosqichlari:</p><ol><li><strong>Yorug\'lik bosqichi:</strong> Xlorofil yorug\'likni yutadi, suv parchalanadi, O₂ ajralib chiqadi</li><li><strong>Qorong\'ulik bosqichi:</strong> CO₂ dan glyukoza sintez qilinadi (Kalvin sikli)</li></ol><p>Fotosintez asosan barglardagi <strong>xloroplastlar</strong>da sodir bo\'ladi.</p>',
+      followUp: 'Fotosintez haqida test topshirmoqchimisiz?'
+    },
+    'anatomiya': {
+      answer: '<p><strong>Inson anatomiyasi</strong> — inson tana tuzilishini o\'rganuvchi fan.</p><p>Asosiy tizimlar:</p><ul><li><strong>Suyak tizimi:</strong> 206 ta suyak, tana tayanchi</li><li><strong>Mushak tizimi:</strong> 600+ mushak, harakatni ta\'minlaydi</li><li><strong>Qon aylanish tizimi:</strong> Yurak, qon tomirlari — moddalar tashish</li><li><strong>Nerv tizimi:</strong> Miya, orqa miya, nervlar — boshqaruv</li><li><strong>Nafas olish tizimi:</strong> O\'pka — gaz almashinuvi</li></ul><p><strong>Yurak</strong> daqiqada ~72 marta urib, butun tana bo\'ylab qon haydaydi.</p>',
+      followUp: 'Biror tizim haqida batafsil o\'rganmoqchimisiz?'
+    },
+    'genetika': {
+      answer: '<p><strong>Genetika</strong> — irsiyat va o\'zgaruvchanlik haqidagi fan.</p><p>Asosiy tushunchalar:</p><ul><li><strong>Gen</strong> — irsiy axborot birligi, DNK da joylashgan</li><li><strong>DNK</strong> — double helix (qo\'sh spiral) shaklidagi molekula</li><li><strong>Xromosoma</strong> — insonda 46 ta (23 juft)</li><li><strong>Dominant gen</strong> — kuchli gen (A), belgini namoyon qiladi</li><li><strong>Retessiv gen</strong> — kuchsiz gen (a), faqat aa holatda namoyon bo\'ladi</li></ul><p><strong>Mendel qonunlari:</strong> irsiyatning asosiy qonunlari</p>',
+      followUp: 'Genetika bo\'yicha masalalar yechmoqchimisiz?'
+    }
+  },
+  chemistry: {
+    'atom': {
+      answer: '<p><strong>Atom</strong> — moddaning eng kichik bo\'lagi, kimyoviy xossalarni saqlaydi.</p><p>Atom tuzilishi:</p><ul><li><strong>Yadro:</strong> Protonlar (+) va neytronlar (0) dan iborat</li><li><strong>Elektronlar (-):</strong> Yadro atrofida aylanadi</li><li><strong>Atom raqami:</strong> Protonlar soniga teng</li><li><strong>Massa soni:</strong> Protonlar + Neytronlar</li></ul><p><strong>Misol:</strong> Uglerod (C) — 6 proton, 6 neytron, 6 elektron</p>',
+      followUp: 'Elementlar davriy jadvali haqida o\'rganmoqchimisiz?'
+    },
+    'reaksiya': {
+      answer: '<p><strong>Kimyoviy reaksiyalar</strong> — moddalarning bir-biriga aylanish jarayoni.</p><p>Reaksiya turlari:</p><ul><li><strong>Birikish:</strong> A + B → AB (ikki modda birlashadi)</li><li><strong>Ajralish:</strong> AB → A + B (bir modda parchalanadi)</li><li><strong>O\'rin almashish:</strong> A + BC → AC + B</li><li><strong>Almashish:</strong> AB + CD → AD + CB</li></ul><p><strong>Misol:</strong> 2H₂ + O₂ → 2H₂O (suv hosil bo\'lishi)</p>',
+      followUp: 'Reaksiya tenglamalarini muvozanatlashni o\'rganmoqchimisiz?'
+    }
+  },
+  history: {
+    'temur': {
+      answer: '<p><strong>Amir Temur</strong> (1336-1405) — buyuk sarkarda va davlat arbobi.</p><p>Hayoti va faoliyati:</p><ul><li>1370-yilda Movarounnahr hukmdori bo\'ldi</li><li>Samarqandni poytaxt qildi</li><li>Markaziy Osiyoni birlashtirdi</li><li>Ilm-fan va me\'morchilikka katta e\'tibor berdi</li></ul><p><strong>Temur siyosati:</strong></p><p>Buyuk Ipak yo\'lini tiklash, savdo-sotiqni rivojlantirish, adolatli boshqaruv o\'rnatish.</p><p>Samarqanddagi <strong>Registon</strong>, <strong>Gur-i Amir</strong>, <strong>Bibi-Xonim</strong> masjidi — uning davrida qurilgan.</p>',
+      followUp: 'Temuriylar davri haqida ko\'proq bilmoqchimisiz?'
+    },
+    'ipak': {
+      answer: '<p><strong>Buyuk Ipak yo\'li</strong> — Sharq va G\'arbni bog\'lagan savdo yo\'li.</p><p>Asosiy ma\'lumotlar:</p><ul><li>Uzunligi: ~7000 km</li><li>Xitoydan Yevropagacha cho\'zilgan</li><li>O\'zbekiston hududida Samarqand, Buxoro, Xiva muhim markazlar bo\'lgan</li><li>Faqat ipak emas, balkin ziravorlar, tosh, metall buyumlar ham tashilgan</li></ul><p>Ipak yo\'li nafaqat savdo, balki <strong>madaniyat, din va ilm-fan</strong> almashinuviga ham xizmat qilgan.</p>',
+      followUp: 'Ipak yo\'lidagi shaharlar haqida ko\'proq o\'qiylikmi?'
+    }
+  },
+  uztili: {
+    'fonetika': {
+      answer: '<p><strong>Fonetika</strong> — tilning tovushlar haqidagi bo\'limi.</p><p>O\'zbek tilida tovushlar:</p><ul><li><strong>Unli tovushlar:</strong> 6 ta (a, e, i, o, u, oʻ) + ya, ye, yo, yu, ya</li><li><strong>Undosh tovushlar:</strong> 24 ta</li><li><strong>Qattiqlilik-qattiqlik:</strong> O\'zbek tili qattiqlik-qattiqlik garmoniyasiga ega</li></ul><p><strong>Misol:</strong> "bola" so\'zida: b-undosh, o-unli, l-undosh, a-unli = 2 unli + 2 undosh</p>',
+      followUp: 'Tovush tahlili qilishni mashq qilaylikmi?'
+    },
+    'morfologiya': {
+      answer: '<p><strong>Morfologiya</strong> — so\'z tuzilishi va o\'zgarishini o\'rganuvchi fan.</p><p>So\'z turlari:</p><ul><li><strong>Otlar:</strong> bola, kitob, maktab</li><li><strong>Sifatlar:</strong> katta, chiroyli, yaxshi</li><li><strong>Sonlar:</strong> bir, ikki, o\'n</li><li><strong>Olmoshlar:</strong> men, sen, bu, u</li><li><strong>Fe\'llar:</strong> bormoq, kelmoq, o\'qimoq</li></ul><p><strong>Misol:</strong> "Katta bola kitob o\'qidi" — katta(sifat) + bola(ot) + kitob(ot) + o\'qidi(fe\'l)</p>',
+      followUp: 'So\'z tahlili qilishni mashq qilaylikmi?'
+    }
+  },
+  geography: {
+    'iqlim': {
+      answer: '<p><strong>Iqlim</strong> — ma\'lum joyda ko\'p yillik ob-havo rejimi.</p><p>Iqlim omillari:</p><ul><li><strong>Quyosh nuri</strong> — asosiy energiya manbai</li><li><strong>Reliyef</strong> — tog\'lar iqlimga ta\'sir qiladi</li><li><strong>Dengiz yaqinligi</strong> — namlikni belgilaydi</li><li><strong>Balandlik</strong> — har 100m ga 0.6°C sovuydi</li></ul><p><strong>O\'zbekiston iqlimi:</strong> Keskin kontinental — yoz issiq va quruq, qish sovuq. Yillik yog\'in: 100-600mm.</p>',
+      followUp: 'O\'zbekistonning tabiiy zonalarini o\'rganmoqchimisiz?'
+    }
+  },
+  informatica: {
+    'algoritm': {
+      answer: '<p><strong>Algoritm</strong> — ma\'lum bir natijaga erishish uchun ketma-ket bajariladigan ko\'rsatmalar to\'plami.</p><p>Algoritm xossalari:</p><ul><li><strong>Aniqlik</strong> — har bir qadam aniq tushunarli bo\'lishi kerak</li><li><strong>Cheklilik</strong> — chekli qadamlardan keyin tugashi kerak</li><li><strong>Natijadorlik</strong> — natija berishi shart</li></ul><p><strong>Misol:</strong> Ikki sonning yig\'indisini topish algoritmi:</p><ol><li>Boshlanish</li><li>A sonini kiritish</li><li>B sonini kiritish</li><li>S = A + B hisoblash</li><li>S ni chiqarish</li><li>Tugash</li></ol>',
+      followUp: 'Dasturlash asoslarini o\'rganmoqchimisiz?'
+    },
+    'dasturlash': {
+      answer: '<p><strong>Dasturlash</strong> — kompyuter uchun ko\'rsatmalar yozish jarayoni.</p><p>Dasturlash tillari:</p><ul><li><strong>Python</strong> — o\'rganish uchun eng oson til</li><li><strong>JavaScript</strong> — web saytlar uchun</li><li><strong>C++</strong> — o\'yinlar va tizimlar uchun</li></ul><p><strong>Python misoli:</strong></p><p style="font-family:var(--font-mono);background:var(--bg-deep);padding:10px;border-radius:8px;margin:0.5rem 0"># Salom dunyo<br>print("Salom, dunyo!")<br><br># Ikki son yig\'indisi<br>a = int(input("A = "))<br>b = int(input("B = "))<br>print("Yig\'indi:", a + b)</p>',
+      followUp: 'Python dasturlashni boshlamoqchimisiz?'
+    }
+  }
+};
+
+const quickQuestionsBySubject = {
+  math: ['Tenglama yechishni o\'rgat', 'Pifagor teoremasi nima?', 'Funksiya nima?', 'Geometriya asoslari'],
+  physics: ['Nyuton qonunlari', 'Optika haqida tushuntir', 'Elektr kuchi nima?', 'Mexanika asoslari'],
+  biology: ['Fotosintez nima?', 'Inson anatomiyasi', 'Genetika asoslari', 'Hujayra tuzilishi'],
+  chemistry: ['Atom tuzilishi', 'Kimyoviy reaksiyalar', 'Davriy jadval', 'Modda turlari'],
+  history: ['Amir Temur haqida', 'Ipak yo\'li nima?', 'O\'zbekiston tarixi', 'Buyuk allomalar'],
+  uztili: ['Fonetika nima?', 'So\'z turlari', 'Morfologiya asoslari', 'Imlo qoidalari'],
+  geography: ['Iqlim nima?', 'O\'zbekiston tabiati', 'Reliyef turlari', 'Aholi joylashuvi'],
+  informatica: ['Algoritm nima?', 'Python dasturlash', 'Kompyuter tuzilishi', 'Internet qanday ishlaydi?']
+};
+
+const quizQuestions = {
+  math: [
+    { q: '2x + 6 = 14 tenglamasini yeching. x = ?', options: ['3', '4', '5', '6'], correct: 1 },
+    { q: 'Uchburchak yuzasini topish formulasi?', options: ['S = a·b', 'S = ½·a·h', 'S = πr²', 'S = a²'], correct: 1 },
+    { q: 'Pifagor teoremasi: a² + b² = ?', options: ['c', 'c²', '2c', 'c³'], correct: 1 },
+    { q: 'y = 3x + 2 funksiyasida x=1 bo\'lsa, y = ?', options: ['3', '5', '6', '2'], correct: 1 },
+    { q: 'Aylana yuzasining formulasi?', options: ['S = 2πr', 'S = πr²', 'S = πd', 'S = r²'], correct: 1 },
+  ],
+  physics: [
+    { q: 'Nyutonning 2-qonuni formulasi?', options: ['F = mv', 'F = ma', 'F = m/a', 'F = m+a'], correct: 1 },
+    { q: 'Tok kuchining birligi?', options: ['Volt', 'Om', 'Amper', 'Vatt'], correct: 2 },
+    { q: 'Yorug\'likning tarqalish tezligi (taxminan)?', options: ['300 m/s', '3000 km/s', '300 000 km/s', '30 000 km/s'], correct: 2 },
+    { q: 'Erkin tushish tezlanishi (g)?', options: ['9.8 m/s²', '10.8 m/s²', '8.9 m/s²', '11 m/s²'], correct: 0 },
+    { q: 'Om qonuni formulasi?', options: ['I = U·R', 'I = U/R', 'I = R/U', 'U = I/R'], correct: 1 },
+  ],
+  biology: [
+    { q: 'Fotosintez jarayonida qaysi gaz ajralib chiqadi?', options: ['CO₂', 'N₂', 'O₂', 'H₂'], correct: 2 },
+    { q: 'Insonda nechta suyak bor?', options: ['106', '206', '306', '186'], correct: 1 },
+    { q: 'DNK qanday shaklga ega?', options: ['To\'g\'ri chiziq', 'Spiral', 'Qo\'sh spiral', 'Halqa'], correct: 2 },
+    { q: 'Xloroplastlar qayerda joylashgan?', options: ['Ildizda', 'Poyada', 'Bargda', 'Gulda'], correct: 2 },
+    { q: 'Insonda nechta xromosoma bor?', options: ['23', '46', '44', '48'], correct: 1 },
+  ],
+  chemistry: [
+    { q: 'Suvning kimyoviy formulasi?', options: ['HO', 'H₂O', 'H₂O₂', 'OH'], correct: 1 },
+    { q: 'Atom yadrosida qanday zarrachalar bor?', options: ['Elektron va proton', 'Proton va neytron', 'Faqat proton', 'Neytron va elektron'], correct: 1 },
+    { q: 'Uglerodning atom raqami?', options: ['4', '6', '8', '12'], correct: 1 },
+    { q: 'Birikish reaksiyasi formulasi?', options: ['A+B→AB', 'AB→A+B', 'A+BC→AC+B', 'AB+CD→AD+CB'], correct: 0 },
+    { q: 'Na — qaysi element?', options: ['Kaliy', 'Natriy', 'Neon', 'Nikel'], correct: 1 },
+  ],
+  history: [
+    { q: 'Amir Temur qachon tug\'ilgan?', options: ['1326', '1336', '1346', '1356'], correct: 1 },
+    { q: 'Temuriylar davlatining poytaxti?', options: ['Buxoro', 'Samarqand', 'Toshkent', 'Xiva'], correct: 1 },
+    { q: 'Buyuk Ipak yo\'li qaysi davlatdan boshlangan?', options: ['Hindiston', 'Xitoy', 'Eron', 'Misr'], correct: 1 },
+    { q: 'Registon qachon qurilgan?', options: ['XIV asr', 'XV asr', 'XVI asr', 'XIII asr'], correct: 1 },
+    { q: 'Amir Temurning mashhur tuzumlari?', options: ['Temur tuzuklari', 'Boburnoma', 'Avesto', 'Shohnoma'], correct: 0 },
+  ],
+  uztili: [
+    { q: 'O\'zbek tilida nechta unli tovush bor?', options: ['4', '6', '8', '10'], correct: 1 },
+    { q: '"Kitob" so\'zida nechta bo\'g\'in bor?', options: ['1', '2', '3', '4'], correct: 1 },
+    { q: 'Fel so\'z turkumi nima soraydi?', options: ['Kim? Nima?', 'Qanday?', 'Nima qildi?', 'Nechta?'], correct: 2 },
+    { q: 'Otlarning ko\'plik jalblovchi qo\'shimchasi?', options: ['-lar', '-lar/-ler', '-lar/-ler/-lar', '—'], correct: 0 },
+    { q: 'Sifat nima bildiradi?', options: ['Narsa nomini', 'Narsa belgisini', 'Sonini', 'Harakatini'], correct: 1 },
+  ],
+  geography: [
+    { q: 'O\'zbekistonning eng baland nuqtasi?', options: ['Hazrat Sulton', 'Adelung', 'Beshtor', 'Gazganda'], correct: 0 },
+    { q: 'O\'zbekiston iqlimi qanday?', options: ['Tropik', 'Keskin kontinental', 'O\'rtacha dengiz', 'Subtropik'], correct: 1 },
+    { q: 'Orol dengizi qaysi viloyatda?', options: ['Samarqand', 'Buxoro', 'Qoraqalpog\'iston', 'Xorazm'], correct: 2 },
+    { q: 'O\'zbekistonning eng katta daryosi?', options: ['Sirdaryo', 'Amudaryo', 'Zarafshon', 'Chirchiq'], correct: 1 },
+    { q: 'Har 100m balandlikka temperatura qancha o\'zgaradi?', options: ['0.3°C', '0.6°C', '1°C', '1.5°C'], correct: 1 },
+  ],
+  informatica: [
+    { q: '1 kilobayt necha bayt?', options: ['100', '512', '1000', '1024'], correct: 3 },
+    { q: 'Python tilida chop etish funksiyasi?', options: ['echo()', 'print()', 'write()', 'show()'], correct: 1 },
+    { q: 'HTML nima?', options: ['Dasturlash tili', 'Belgilash tili', 'Ma\'lumotlar bazasi', 'Operatsion tizim'], correct: 1 },
+    { q: 'Algoritmning asosiy xossasi?', options: ['Cheksizlik', 'Aniqlik', 'Murakkablik', 'Tasodifiylik'], correct: 1 },
+    { q: 'RAM nima?', options: ['Doimiy xotira', 'Tez xotira', 'Qattiq disk', 'Protsessor'], correct: 1 },
+  ]
+};
+
+/* === CHAT ENGINE === */
+function initChat() {
+  renderChatSubjects();
+  renderGradeSelector();
+  renderQuickQuestions();
+}
+
+function renderChatSubjects() {
+  const list = document.getElementById('chat-subject-list');
+  list.innerHTML = `
+    <button class="subject-btn ${state.currentSubject === null ? 'active' : ''}" onclick="selectSubject(null)">
+      <span class="subj-icon">🌐</span> Erkin savol
+    </button>
+  ` + subjects.map(s => `
+    <button class="subject-btn ${state.currentSubject === s.id ? 'active' : ''}" onclick="selectSubject('${s.id}')">
+      <span class="subj-icon">${s.icon}</span> ${s.name}
+    </button>
+  `).join('');
+}
+
+function renderGradeSelector() {
+  const sel = document.getElementById('grade-selector');
+  sel.innerHTML = Array.from({length: 11}, (_, i) => i + 1).map(g => `
+    <button class="grade-btn ${state.selectedGrade === g ? 'active' : ''}" onclick="selectGrade(${g})">${g}</button>
+  `).join('');
+}
+
+function renderQuickQuestions() {
+  const container = document.getElementById('quick-questions');
+  const subj = state.currentSubject;
+  
+  if (subj === null) {
+    // Erkin rejim — umumiy savollar
+    const freeQuestions = [
+      'Sun\'iy intellekt nima?',
+      'Dunyo aholisi qancha?',
+      'Eng baland tog\' qaysi?',
+      'Sog\'lom ovqatlanish sirlari',
+      'Dasturlashni qanday o\'rganish mumkin?',
+      'O\'zbekiston poytaxti qachon tashkil etilgan?'
+    ];
+    container.innerHTML = freeQuestions.map(q => `
+      <button class="quick-q" onclick="askQuickQuestion('${q.replace(/'/g, "\\'")}')">${q}</button>
+    `).join('');
+    return;
+  }
+  
+  const qs = quickQuestionsBySubject[subj] || [];
+  container.innerHTML = qs.map(q => `
+    <button class="quick-q" onclick="askQuickQuestion('${q.replace(/'/g, "\\'")}')">${q}</button>
+  `).join('');
+}
+
+function selectSubject(id) {
+  state.currentSubject = id;
+  renderChatSubjects();
+  renderQuickQuestions();
+  // Update placeholder and header based on mode
+  const input = document.getElementById('chat-input');
+  const nameEl = document.getElementById('chat-ai-name');
+  if (id === null) {
+    input.placeholder = 'Istalgan savolingizni yozing...';
+    nameEl.textContent = 'AI-Repetitor (Erkin rejim)';
+  } else {
+    const subj = subjects.find(s => s.id === id);
+    input.placeholder = subj ? `${subj.name} bo'yicha savolingizni yozing...` : 'Savolingizni yozing...';
+    nameEl.textContent = subj ? `AI-Repetitor — ${subj.name}` : 'AI-Repetitor';
+  }
+}
+
+function selectGrade(g) {
+  state.selectedGrade = g;
+  renderGradeSelector();
+}
+
+function askQuickQuestion(q) {
+  document.getElementById('chat-input').value = q;
+  sendChat();
+}
+
+function clearChat() {
+  state.chatHistory = [];
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = `
+    <div class="chat-welcome">
+      <div class="welcome-icon">🎓</div>
+      <h3>Assalomu alaykum!</h3>
+      <p>Men AI-Repetitorman. Har qanday savolingizga javob bera olaman. Chap paneldan "Erkin savol" yoki biror fanni tanlang!</p>
+    </div>`;
+  clearAttachments(); // biriktirilgan rasmlarni ham tozalaymiz
+}
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+
+  // Rasm biriktirilgan bo'lsa, matn shart emas
+  if (!text && attachedImages.length === 0) return;
+
+  // Yuborilayotgan rasmlarni ajratib olamiz va inputni bo'shatamiz
+  const outgoingImages = attachedImages.slice();
+  input.value = '';
+  clearAttachments();
+  setChatBusy(true);
+
+  const msgs = document.getElementById('chat-messages');
+  // Remove welcome if present
+  const welcome = msgs.querySelector('.chat-welcome');
+  if (welcome) welcome.remove();
+
+  // Add user message
+  addChatMessage('user', text, outgoingImages);
+  state.chatHistory.push({ role: 'user', text, images: outgoingImages.length });
+
+  // Show typing
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'chat-msg ai';
+  typingDiv.id = 'typing-indicator';
+  typingDiv.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-bubble">
+      <div class="typing-indicator"><span></span><span></span><span></span></div>
+    </div>`;
+  msgs.appendChild(typingDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  document.getElementById('chat-status').textContent = outgoingImages.length
+    ? 'Rasmni ko\'rib chiqayapman...'
+    : 'O\'ylayapman...';
+
+  // Generate response via AI
+  getAIResponse(text, outgoingImages).then(response => {
+    typingDiv.remove();
+    addChatMessage('ai', response);
+    state.chatHistory.push({ role: 'ai', text: response });
+    document.getElementById('chat-status').textContent = 'Tayyor — savol bering';
+    logActivity('chat', text || `${outgoingImages.length} ta rasm yuborildi`);
+  }).catch(err => {
+    console.error('AI javob xatosi:', err);
+    typingDiv.remove();
+    addChatMessage('ai', `<p>Kechirasiz, javob olishda xatolik yuz berdi.</p><p style="color:var(--accent-red);font-size:0.8rem;opacity:0.85">${escapeHtml(err && err.message ? err.message : String(err))}</p>`);
+    document.getElementById('chat-status').textContent = 'Tayyor — savol bering';
+  }).finally(() => {
+    setChatBusy(false);
+  });
+}
+
+// Javob kutilayotganda tugmalarni bloklaymiz
+function setChatBusy(busy) {
+  ['btn-send', 'btn-attach', 'btn-camera'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = busy;
+  });
+}
+
+async function getAIResponse(input, images) {
+  // Erkin rejimda subject aniqlash shart emas
+  const subj = state.currentSubject || detectSubject(input.toLowerCase());
+  const subjData = subjects.find(s => s.id === subj);
+  const subjectName = (state.currentSubject === null) ? '' : (subjData ? subjData.name : '');
+  const grade = state.selectedGrade;
+
+  const imgList = Array.isArray(images) ? images : [];
+  const subjectContext = subjectName ? `Hozirgi tanlangan fan: ${subjectName}.` : 'Fan tanlanmagan — erkin rejimda ishlayapsan.';
+  const gradeContext = grade ? `O'quvchi sinfi: ${grade}-sinf. Javobingni shu yoshga moslab ber.` : '';
+
+  // Rasm yuborilganda AI ga qo'shimcha ko'rsatma
+  const visionContext = imgList.length ? `
+
+## Rasm bilan ishlash:
+O'quvchi ${imgList.length} ta rasm yubordi. Rasmni diqqat bilan o'qib chiq va quyidagicha ish tut:
+- Agar rasmda **masala yoki savol** bo'lsa: shartini o'qib ber, keyin bosqichma-bosqich yechib ber va javobni ajratib ko'rsat.
+- Agar rasmda **matn** bo'lsa (kitob, daftar, doska): matnni o'qib, tushuntirib ber yoki so'ralgan amalni bajar.
+- Agar rasmda **diagramma, grafik, jadval yoki chizma** bo'lsa: unda nima ko'rsatilganini izohlab ber.
+- Agar rasmda **o'quvchining yechimi** bo'lsa: xatolarini toping, to'g'ri yo'lni ko'rsating va rag'batlantiring.
+- Agar rasm **noaniq yoki o'qilmasa**: buni ochiq ayting va yaxshiroq rasm so'rang (yorug'lik, fokus, to'liq kadr).
+- Rasmda ko'rmagan narsani taxmin qilib yozmang.` : '';
+
+  const systemPrompt = `Sen AI-Repetitorsan — universal bilimga ega bo'lgan shaxsiy yordamchisan. Sen HAR QANDAY mavzuda savollarga javob bera olasan:
+
+## Asosiy qoidalar:
+1. **Har qanday savolga javob ber** — fan, texnologiya, san'at, sport, sog'liq, huquq, biznes, psixologiya, falsafa, kundalik hayot, munosabatlar, retseptlar, sayohat, va hokazo.
+2. Agar savol aniq fanga tegishli bo'lsa, ${subjectContext} ${gradeContext}
+3. Agar savol fanga aloqador bo'lmasa, baribir to'liq va sifatli javob ber.
+4. Murakkab mavzularni sodda va tushunarli qilib tushuntir.
+5. Javobingda kerak bo'lsa misollar, qiyoslar, ro'yxatlar ishlat.
+6. Agar savol noaniq bo'lsa, aniqlashtirish so'ra, lekin baribir qisqa javob ber.
+7. Xavfli, noqonuniy yoki zararli so'rovlarga javob berishdan bosh tort.
+
+## Format:
+- Javobni faqat oddiy HTML teglar bilan formatla: <p>, <strong>, <em>, <ul>, <li>, <ol>, <h3>, <h4>, <code>, <pre>
+- <html>, <head>, <body> teglarini ISHLATMA
+- Javob o'zbek tilida, do'stona va professional ohangda bo'lsin
+- Kerak bo'lsa emoji ishlat, lekin me'yorida${visionContext}`;
+
+  // MUHIM: bu manzilni o'zingizning backend serveringiz manziliga almashtiring.
+  // Masalan: "https://sizning-serveringiz.com/api/chat"
+  const BACKEND_URL = '/api/chat';
+
+  let response;
+  try {
+    response = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system: systemPrompt,
+        input,
+        // Rasmlarni serverga base64 ko'rinishida uzatamiz
+        images: imgList.map(img => ({ media_type: img.mediaType, data: img.data }))
+      })
+    });
+  } catch (networkErr) {
+    throw new Error('Tarmoq xatosi (fetch amalga oshmadi): ' + networkErr.message);
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseErr) {
+    throw new Error('Javobni o\'qib bo\'lmadi (status ' + response.status + ')');
+  }
+
+  if (!response.ok) {
+    throw new Error('Server xatosi (' + response.status + '): ' + (data && data.error && data.error.message ? data.error.message : JSON.stringify(data)));
+  }
+
+  if (!data.text) return '<p>Kechirasiz, javob topilmadi.</p>';
+
+  // Javob HTML teglar bilan kelgan bo'lsa <br> qo'shmaymiz — aks holda ortiqcha bo'sh joy paydo bo'ladi
+  const looksLikeHtml = /<(p|ul|ol|li|h3|h4|pre|div|table)\b/i.test(data.text);
+  return looksLikeHtml ? data.text : data.text.replace(/\n/g, '<br>');
+}
+
+function addChatMessage(role, text, images) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  const avatar = role === 'user' ? '👤' : '🤖';
+
+  // Yuborilgan rasmlarni xabar ichida ko'rsatamiz
+  const imgList = Array.isArray(images) ? images : [];
+  const imagesHtml = imgList.length
+    ? `<div class="msg-images">${imgList.map(img =>
+        `<img src="${img.preview}" alt="Yuborilgan rasm" onclick="openLightbox(this.src)">`
+      ).join('')}</div>`
+    : '';
+
+  const body = role === 'user' ? escapeHtml(text || '') : (text || '');
+
+  div.innerHTML = `
+    <div class="msg-avatar">${avatar}</div>
+    <div class="msg-bubble">${imagesHtml}${body}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function generateResponse(input) {
+  const lower = input.toLowerCase();
+  const subj = state.currentSubject || detectSubject(lower);
+
+  // Search knowledge base
+  const kb = knowledgeBase[subj];
+  if (kb) {
+    for (const [key, val] of Object.entries(kb)) {
+      if (lower.includes(key) && val) {
+        updateProgress(subj, key, true);
+        return val.answer + (val.followUp ? `<p style="margin-top:0.8rem;color:var(--accent-secondary);font-style:italic">${val.followUp}</p>` : '');
+      }
+    }
+  }
+
+  // Generic responses
+  if (lower.includes('salom') || lower.includes('assalom')) {
+    return '<p>Assalomu alaykum! 👋 Men AI-Repetitorman. Sizga qanday yordam bera olaman?</p><p>Fanni tanlang va savolingizni yozing — men sizga tushuntirib beraman!</p>';
+  }
+
+  if (lower.includes('rahmat') || lower.includes('raxmat')) {
+    return '<p>Arzimaydi! 😊 Yana savollaringiz bo\'lsa, bemalol so\'rang. O\'rganishda davom eting!</p>';
+  }
+
+  // Subject-specific fallback
+  const subjData = subjects.find(s => s.id === subj);
+  if (subjData) {
+    return `<p>${subjData.icon} <strong>${subjData.name}</strong> fanidan savolingiz uchun rahmat!</p><p>Sizning savolingizga aniq javob topish uchun, iltimos, mavzuni aniqlashtiring:</p><ul>${subjData.topics.map(t => `<li>${t}</li>`).join('')}</ul><p>Qaysi mavzu bo'yicha yordam kerak?</p>`;
+  }
+
+  return '<p>Savolingiz qiziqarli! 🤔 Iltimos, qaysi fan bo\'yicha savol berayotganingizni aniqlashtiring (chap paneldan fan tanlang), va men sizga batafsil yordam beraman.</p>';
+}
+
+function detectSubject(text) {
+  const keywords = {
+    math: ['tenglama', 'hisob', 'son', 'algebra', 'geometriya', 'funksiya', 'uchburchak', 'aylana', 'yuzas'],
+    physics: ['kuch', 'tezlik', 'massa', 'energiya', 'tok', 'yoruglik', 'harakat', 'nyuton'],
+    biology: ['o\'simlik', 'hayvon', 'hujayra', 'fotosintez', 'gen', 'anatomiya', 'organizm', 'barg'],
+    chemistry: ['element', 'atom', 'modda', 'reaksiya', 'kimyov', 'birikma'],
+    history: ['tarix', 'temur', 'ipak', 'davlat', 'urush', 'xalq', 'sarkarda'],
+    uztili: ['so\'z', 'tovush', 'grammatika', 'fel', 'ot', 'sifat', 'imlo', 'bo\'g\'in'],
+    geography: ['iqlim', 'daryo', 'tog\'', 'shahar', 'aholi', 'hudud', 'cho\'l'],
+    informatica: ['dastur', 'kompyuter', 'algoritm', 'internet', 'kod', 'python', 'xotira']
+  };
+  let best = 'math';
+  let bestScore = 0;
+  for (const [subj, words] of Object.entries(keywords)) {
+    const score = words.filter(w => text.includes(w)).length;
+    if (score > bestScore) { bestScore = score; best = subj; }
+  }
+  return best;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* === QUIZ ENGINE === */
+let quizState = { subject: null, current: 0, score: 0, answered: false };
+
+function initQuiz() {
+  const container = document.getElementById('quiz-subjects');
+  container.innerHTML = subjects.map(s => `
+    <button class="quiz-subj-btn" data-subj="${s.id}" onclick="selectQuizSubject('${s.id}')">
+      ${s.icon} ${s.name}
+    </button>
+  `).join('');
+}
+
+function selectQuizSubject(id) {
+  quizState.subject = id;
+  document.querySelectorAll('.quiz-subj-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.quiz-subj-btn[data-subj="${id}"]`).classList.add('active');
+  document.getElementById('quiz-start-btn').disabled = false;
+}
+
+function startQuiz() {
+  if (!quizState.subject) return;
+  quizState.current = 0;
+  quizState.score = 0;
+  quizState.answered = false;
+  document.getElementById('quiz-setup').style.display = 'none';
+  document.getElementById('quiz-active').style.display = 'block';
+  document.getElementById('quiz-result').style.display = 'none';
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  const questions = quizQuestions[quizState.subject];
+  if (!questions || quizState.current >= questions.length) {
+    showQuizResult();
+    return;
+  }
+  const q = questions[quizState.current];
+  const total = questions.length;
+  document.getElementById('quiz-progress-fill').style.width = `${(quizState.current / total) * 100}%`;
+  document.getElementById('quiz-counter').textContent = `Savol ${quizState.current + 1} / ${total}`;
+  document.getElementById('quiz-question-text').textContent = q.q;
+  quizState.answered = false;
+
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML = q.options.map((opt, i) => `
+    <button class="quiz-option" onclick="answerQuiz(${i})">${opt}</button>
+  `).join('');
+}
+
+function answerQuiz(idx) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+
+  const questions = quizQuestions[quizState.subject];
+  const q = questions[quizState.current];
+  const buttons = document.querySelectorAll('.quiz-option');
+
+  buttons.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.correct) btn.classList.add('correct');
+    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+  });
+
+  if (idx === q.correct) {
+    quizState.score++;
+    updateProgress(quizState.subject, 'quiz', true);
+  } else {
+    updateProgress(quizState.subject, 'quiz', false);
+  }
+
+  setTimeout(() => {
+    quizState.current++;
+    showQuizQuestion();
+  }, 1200);
+}
+
+function showQuizResult() {
+  document.getElementById('quiz-active').style.display = 'none';
+  const result = document.getElementById('quiz-result');
+  result.style.display = 'block';
+
+  const questions = quizQuestions[quizState.subject];
+  const total = questions.length;
+  const pct = Math.round((quizState.score / total) * 100);
+  const subj = subjects.find(s => s.id === quizState.subject);
+
+  let emoji = '🎉';
+  let msg = 'Ajoyib natija!';
+  if (pct < 40) { emoji = '📚'; msg = 'Ko\'proq mashq qilish kerak'; }
+  else if (pct < 70) { emoji = '💪'; msg = 'Yaxshi, lekin yaxshilash mumkin'; }
+  else if (pct < 90) { emoji = '🌟'; msg = 'Juda yaxshi natija!'; }
+
+  state.quizScore += quizState.score;
+  state.quizTotal += total;
+
+  result.innerHTML = `
+    <div class="quiz-result-icon">${emoji}</div>
+    <h2>${msg}</h2>
+    <div class="score-big">${quizState.score} / ${total}</div>
+    <p>${subj.icon} ${subj.name} — ${pct}% to'g'ri javob</p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:1rem">
+      <button class="btn btn-primary" onclick="resetQuiz()">Qayta urinish</button>
+      <button class="btn btn-outline" onclick="showPage('progress')">Progressni ko'rish</button>
+    </div>`;
+
+  logActivity('quiz', `${subj.name}: ${quizState.score}/${total}`);
+}
+
+function resetQuiz() {
+  quizState.current = 0;
+  quizState.score = 0;
+  document.getElementById('quiz-result').style.display = 'none';
+  document.getElementById('quiz-setup').style.display = 'flex';
+}
+
+/* === PROGRESS ENGINE === */
+const activityLog = [];
+const subjectProgress = {};
+
+function initProgress() {
+  subjects.forEach(s => {
+    subjectProgress[s.id] = { correct: 0, total: 0, topics: {} };
+  });
+}
+
+function updateProgress(subjectId, topic, correct) {
+  if (!subjectProgress[subjectId]) subjectProgress[subjectId] = { correct: 0, total: 0, topics: {} };
+  subjectProgress[subjectId].total++;
+  if (correct) subjectProgress[subjectId].correct++;
+  if (!subjectProgress[subjectId].topics[topic]) subjectProgress[subjectId].topics[topic] = { correct: 0, total: 0 };
+  subjectProgress[subjectId].topics[topic].total++;
+  if (correct) subjectProgress[subjectId].topics[topic].correct++;
+}
+
+function logActivity(type, text) {
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  activityLog.unshift({ type, text, time });
+  if (activityLog.length > 20) activityLog.pop();
+}
+
+function renderProgress() {
+  // Stats
+  const totalQ = Object.values(subjectProgress).reduce((a, s) => a + s.total, 0);
+  const totalCorrect = Object.values(subjectProgress).reduce((a, s) => a + s.correct, 0);
+  const pct = totalQ > 0 ? Math.round((totalCorrect / totalQ) * 100) : 0;
+
+  document.getElementById('progress-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${totalQ}</div><div class="stat-label">Jami savollar</div></div>
+    <div class="stat-card"><div class="stat-value">${totalCorrect}</div><div class="stat-label">To'g'ri javob</div></div>
+    <div class="stat-card"><div class="stat-value">${pct}%</div><div class="stat-label">Aniqlik</div></div>
+    <div class="stat-card"><div class="stat-value">${activityLog.length}</div><div class="stat-label">Faoliyatlar</div></div>`;
+
+  // Subject bars
+  const bars = document.getElementById('progress-bars');
+  const colors = ['#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
+  bars.innerHTML = subjects.map((s, i) => {
+    const sp = subjectProgress[s.id] || { correct: 0, total: 0 };
+    const p = sp.total > 0 ? Math.round((sp.correct / sp.total) * 100) : 0;
+    return `<div class="progress-bar-item">
+      <div class="progress-bar-header"><span>${s.icon} ${s.name}</span><span>${p}%</span></div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${p}%;background:${colors[i]}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Weak topics
+  const weakEl = document.getElementById('weak-topics');
+  const weakTopics = [];
+  for (const [subjId, data] of Object.entries(subjectProgress)) {
+    for (const [topic, tData] of Object.entries(data.topics)) {
+      if (tData.total > 0) {
+        const tp = Math.round((tData.correct / tData.total) * 100);
+        if (tp < 70) {
+          const subj = subjects.find(s => s.id === subjId);
+          weakTopics.push({ name: `${subj ? subj.icon : ''} ${topic}`, score: tp });
+        }
+      }
+    }
+  }
+  weakTopics.sort((a, b) => a.score - b.score);
+  if (weakTopics.length > 0) {
+    weakEl.innerHTML = weakTopics.slice(0, 5).map(t => `
+      <div class="weak-topic">
+        <span class="weak-topic-name">${t.name}</span>
+        <span class="weak-topic-score">${t.score}%</span>
+      </div>`).join('');
+  } else {
+    weakEl.innerHTML = '<p class="empty-state">Hali zaif tomonlar aniqlanmagan. Test topshiring va savol bering!</p>';
+  }
+
+  // Activity log
+  const logEl = document.getElementById('activity-log');
+  if (activityLog.length > 0) {
+    logEl.innerHTML = activityLog.slice(0, 10).map(a => {
+      const icon = a.type === 'chat' ? '💬' : '📝';
+      const iconBg = a.type === 'chat' ? 'rgba(99,102,241,0.15)' : 'rgba(16,185,129,0.15)';
+      return `<div class="activity-item">
+        <div class="activity-icon" style="background:${iconBg}">${icon}</div>
+        <span class="activity-text">${escapeHtml(a.text.substring(0, 40))}${a.text.length > 40 ? '...' : ''}</span>
+        <span class="activity-time">${a.time}</span>
+      </div>`;
+    }).join('');
+  } else {
+    logEl.innerHTML = '<p class="empty-state">Hali faoliyat yo\'q. Suhbatni boshlang!</p>';
+  }
+}
+
+/* === SUBJECTS PAGE INIT === */
+function initSubjects() {
+  const grid = document.getElementById('subjects-grid');
+  const colors = ['#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
+  grid.innerHTML = subjects.map((s, i) => `
+    <div class="subject-card" style="--card-accent:${colors[i]}" onclick="goToSubjectChat('${s.id}')">
+      <div class="subject-card-icon">${s.icon}</div>
+      <h3>${s.name}</h3>
+      <p>${s.desc}</p>
+      <span class="topic-count">${s.topics.length} mavzu</span>
+    </div>`).join('');
+}
+
+function goToSubjectChat(id) {
+  state.currentSubject = id;
+  showPage('chat');
+  renderChatSubjects();
+  renderQuickQuestions();
+}
+
+/* === PAGE SHOW OVERRIDE === */
+const originalShowPage = showPage;
+showPage = function(page) {
+  originalShowPage(page);
+  if (page === 'progress') renderProgress();
+  // Chat sahifasidan chiqilsa kamerani o'chiramiz
+  if (page !== 'chat' && typeof cameraStream !== 'undefined' && cameraStream) closeCamera();
+};
+
+/* === INIT === */
+document.addEventListener('DOMContentLoaded', () => {
+  initLanding();
+  initChat();
+  initSubjects();
+  initQuiz();
+  initProgress();
+});
+
+function initLanding() {}
+
+/* ==========================================================
+   RASM YUBORISH (VISION) — galereya, kamera, joylash (paste)
+   ========================================================== */
+
+const MAX_ATTACH = 5;                    // bir xabarda maksimal rasm soni
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // yuklanadigan fayl chegarasi (siqishdan oldin)
+const MAX_DIMENSION = 1400;              // siqishdan keyingi maksimal o'lcham (px)
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+
+// Tanlangan rasmlar: { id, mediaType, data(base64), preview(dataURL) }
+let attachedImages = [];
+let cameraStream = null;
+
+/* --- Fayllarni qabul qilish --- */
+async function handleImageFiles(files) {
+  const list = Array.from(files || []);
+  if (!list.length) return;
+
+  for (const file of list) {
+    if (attachedImages.length >= MAX_ATTACH) {
+      alert(`Bir xabarda maksimal ${MAX_ATTACH} ta rasm yuborish mumkin.`);
+      break;
+    }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert(`"${file.name}" — qo'llab-quvvatlanmaydigan format. Faqat JPG, PNG, GIF, WEBP.`);
+      continue;
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      alert(`"${file.name}" juda katta (maksimal 10MB).`);
+      continue;
+    }
+    try {
+      const prepared = await prepareImage(file);
+      attachedImages.push(prepared);
+    } catch (err) {
+      console.error('Rasmni o\'qish xatosi:', err);
+      alert(`"${file.name}" faylini o'qib bo'lmadi.`);
+    }
+  }
+  renderAttachPreview();
+}
+
+/* --- Rasmni canvas orqali siqish (GIF animatsiyasini saqlash uchun GIF siqilmaydi) --- */
+function prepareImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('FileReader xatosi'));
+    reader.onload = () => {
+      const dataUrl = reader.result;
+
+      // GIF ni siqmaymiz — animatsiya buzilmasin
+      if (file.type === 'image/gif') {
+        return resolve(makeAttachment(dataUrl, 'image/gif'));
+      }
+
+      const img = new Image();
+      img.onerror = () => reject(new Error('Rasm yuklanmadi'));
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height));
+
+        // Kichik rasm bo'lsa qayta kodlashga hojat yo'q
+        if (scale === 1 && dataUrl.length < 1.6 * 1024 * 1024) {
+          return resolve(makeAttachment(dataUrl, file.type));
+        }
+
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // PNG shaffofligini yo'qotmaslik uchun turini saqlaymiz
+        const keepPng = file.type === 'image/png';
+        if (!keepPng) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const outType = keepPng ? 'image/png' : 'image/jpeg';
+        const out = canvas.toDataURL(outType, keepPng ? undefined : 0.85);
+        resolve(makeAttachment(out, outType));
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function makeAttachment(dataUrl, mediaType) {
+  const base64 = dataUrl.split(',')[1] || '';
+  return {
+    id: 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+    mediaType,
+    data: base64,
+    preview: dataUrl
+  };
+}
+
+/* --- Preview chizish --- */
+function renderAttachPreview() {
+  const box = document.getElementById('attach-preview');
+  if (!box) return;
+
+  if (!attachedImages.length) {
+    box.classList.remove('active');
+    box.innerHTML = '';
+    return;
+  }
+
+  box.classList.add('active');
+  box.innerHTML = attachedImages.map(img => `
+    <div class="attach-thumb">
+      <img src="${img.preview}" alt="Yuklangan rasm">
+      <button class="attach-remove" onclick="removeAttachment('${img.id}')" title="O'chirish">&times;</button>
+    </div>`).join('');
+}
+
+function removeAttachment(id) {
+  attachedImages = attachedImages.filter(img => img.id !== id);
+  renderAttachPreview();
+}
+
+function clearAttachments() {
+  attachedImages = [];
+  renderAttachPreview();
+}
+
+/* --- Kamera --- */
+async function openCamera() {
+  const modal = document.getElementById('camera-modal');
+  const errBox = document.getElementById('camera-error');
+  errBox.classList.remove('active');
+  modal.classList.add('active');
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showCameraError('Bu brauzer kamerani qo\'llab-quvvatlamaydi. "Rasm yuklash" tugmasidan foydalaning.');
+    return;
+  }
+
+  try {
+    // Telefonda orqa kamera afzal (masala/daftar rasmga olish uchun)
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false
+    });
+    const video = document.getElementById('camera-video');
+    video.srcObject = cameraStream;
+    await video.play();
+  } catch (err) {
+    console.error('Kamera xatosi:', err);
+    let msg = 'Kamerani ochib bo\'lmadi.';
+    if (err.name === 'NotAllowedError') {
+      msg = 'Kameraga ruxsat berilmadi. Brauzer sozlamalarida ruxsat bering.';
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      msg = 'Kamera topilmadi. "Rasm yuklash" tugmasidan foydalaning.';
+    } else if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      msg = 'Kamera faqat HTTPS orqali ishlaydi. Saytni HTTPS da oching.';
+    }
+    showCameraError(msg);
+  }
+}
+
+function showCameraError(msg) {
+  const errBox = document.getElementById('camera-error');
+  errBox.textContent = msg;
+  errBox.classList.add('active');
+}
+
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  const video = document.getElementById('camera-video');
+  if (video) video.srcObject = null;
+  document.getElementById('camera-modal').classList.remove('active');
+}
+
+function capturePhoto() {
+  const video = document.getElementById('camera-video');
+  if (!video || !video.videoWidth) {
+    showCameraError('Kamera hali tayyor emas, bir lahza kutib turing.');
+    return;
+  }
+  if (attachedImages.length >= MAX_ATTACH) {
+    alert(`Bir xabarda maksimal ${MAX_ATTACH} ta rasm yuborish mumkin.`);
+    return;
+  }
+
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(video.videoWidth, video.videoHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(video.videoWidth * scale);
+  canvas.height = Math.round(video.videoHeight * scale);
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.87);
+  attachedImages.push(makeAttachment(dataUrl, 'image/jpeg'));
+  renderAttachPreview();
+  closeCamera();
+}
+
+/* --- Clipboard'dan joylash (Ctrl+V) --- */
+document.addEventListener('paste', (e) => {
+  if (state.currentPage !== 'chat') return;
+  const items = (e.clipboardData && e.clipboardData.items) || [];
+  const files = [];
+  for (const item of items) {
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      const f = item.getAsFile();
+      if (f) files.push(f);
+    }
+  }
+  if (files.length) {
+    e.preventDefault();
+    handleImageFiles(files);
+  }
+});
+
+/* --- Rasmni katta ko'rish --- */
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = src;
+  lb.classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.getElementById('lightbox-img').src = '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('lightbox').classList.contains('active')) closeLightbox();
+  else if (document.getElementById('camera-modal').classList.contains('active')) closeCamera();
+});
+</script>
+
+<!-- KAMERA MODALI -->
+<div class="camera-modal" id="camera-modal">
+  <div class="camera-box">
+    <h3>📷 Kameradan rasmga olish</h3>
+    <div class="camera-view">
+      <video id="camera-video" playsinline muted autoplay></video>
+    </div>
+    <div class="camera-error" id="camera-error"></div>
+    <div class="camera-actions">
+      <button class="btn btn-outline" onclick="closeCamera()">Bekor qilish</button>
+      <button class="btn btn-primary" onclick="capturePhoto()">Rasmga olish</button>
+    </div>
+  </div>
+</div>
+
+<!-- RASMNI KATTA KO'RISH -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" alt="Rasm">
+</div>
+</body>
+</html>
